@@ -36,35 +36,82 @@ namespace PrototipoSeguridad
         {
             this.Hide();
         }
-        
+
+        String app = "5";
 
         private void Frm_MantenimientoApp_Load(object sender, EventArgs e)
         {
             bloqueados();
-            //comboBox_app();
-           // comboBox_User();
-            string sql = "select count(U.id_usuario) as total from Usuario U ";
-            MySqlCommand com = new MySqlCommand(sql, cn);
+            /*    comboBox_app();
+                comboBox_User();
+                string sql = "select count(U.id_usuario) as total from Usuario U ";
+                MySqlCommand com = new MySqlCommand(sql, cn);
 
-            cn.Open();
-            MySqlDataReader Reader = com.ExecuteReader();
+                cn.Open();
+                MySqlDataReader Reader = com.ExecuteReader();
+
+                if (Reader.Read())
+                {
+
+                    Txt_user.Text = Reader["total"].ToString();
+                    num = Convert.ToInt32(Txt_user.Text);
+                }
+                cn.Close();
+               // primer();
+               */
+            primer();
+        }
+        int Valor1;
+        int Valor2;
+
+        public void ConvertirU()
+        {
+
+            string sql = "select U.id_usuario from usuario U where U.usuario ='" + Cmb_user.Text + "';";
+            MySqlCommand cmd = new MySqlCommand(sql, cn);
+
+            cn.Open(); 
+            MySqlDataReader Reader = cmd.ExecuteReader();
 
             if (Reader.Read())
             {
-
-                Txt_user.Text = Reader["total"].ToString();
-                num = Convert.ToInt32(Txt_user.Text);
+                Valor1 = Convert.ToInt32(Reader["id_usuario"]);
             }
+            MessageBox.Show("Es el numero del ID del usuario " + Valor1);
+
             cn.Close();
-           // primer();
 
         }
 
-      
+        public void ConvertirA()
+        {
+
+            string sql = "select A.id_aplicacion from aplicacion A where A.nombre_aplicacion ='" + Cmb_aplicacion.Text + "';";
+            MySqlCommand cmd = new MySqlCommand(sql, cn);
+
+            cn.Open(); 
+            MySqlDataReader Reader = cmd.ExecuteReader();
+
+            if (Reader.Read())
+            {
+                Valor2 = Convert.ToInt32(Reader["id_aplicacion"]);
+            }
+            MessageBox.Show("Es el numero del ID de la app " + Valor2);
+
+            cn.Close();
+
+        }
+
+        String DatoSeleccionado;
 
         public void primer() {
+            DatoSeleccionado = Cmb_user.Text;
+            ConvertirU();
+            ConvertirA();
 
-            string sql = "select  U.nombre_usuario, ap.nombre_aplicacion, D.ingresar, D.modificar, D.eliminar, D.imprimir,D.consultar from Usuario U, Aplicacion ap, Detalle_aplicacion_derecho D where D.id_usuario = " + auxG + " and D.id_usuario = U.id_usuario and D.id_aplicacion = ap.id_aplicacion; ";
+           // "select A.id_aplicacion from aplicacion A where A.nombre_aplicacion ='" + Cmb_aplicacion.Text + "');"
+            string sql = "SELECT ingresar,modificar,imprimir,consultar,eliminar FROM detalle_aplicacion_derecho where id_usuario = '"+ Valor1  + "' and id_aplicacion = '" + Valor2 + "';";
+            //string sql = "select  U.nombre_usuario, ap.nombre_aplicacion, D.ingresar, D.modificar, D.eliminar, D.imprimir,D.consultar from Usuario U, Aplicacion ap, Detalle_aplicacion_derecho D where D.id_usuario = " + "(select id_perfil from perfil where nombre_perfil = '" + DatoSeleccionado + "')" + " and D.id_usuario = U.id_usuario and D.id_aplicacion = ap.id_aplicacion; ";
             MySqlCommand com = new MySqlCommand(sql, cn);
 
 
@@ -73,8 +120,8 @@ namespace PrototipoSeguridad
 
             if (Reader.Read())
             {
-                Txt_user.Text = Reader["nombre_usuario"].ToString();
-                Txt_aplicacion.Text = Reader["nombre_aplicacion"].ToString();
+               // Cmb_user.Text = Reader["nombre_usuario"].ToString();
+               // Txt_aplicacion.Text = Reader["nombre_aplicacion"].ToString();
                 I = Convert.ToInt32(Reader["ingresar"]);
                 M = Convert.ToInt32(Reader["modificar"]);
                 Im = Convert.ToInt32(Reader["imprimir"]);
@@ -118,20 +165,23 @@ namespace PrototipoSeguridad
         //Ingresa los nuevos privilegios a un usuario
         private void Btn_ingresar_Click(object sender, EventArgs e)
         {
+            try
+            {
+
             if (Chb_editar.Checked == true) { M = 1; } else { M = 0; }
             if (Chb_insertar.Checked == true) { I = 1; } else { I = 0; }
             if (Chb_eliminar.Checked == true) { E = 1; } else { E = 0; }
             if (Chb_consultar.Checked == true) { C = 1; } else { C = 0; }
             if (Chb_imprimir.Checked == true) { Im = 1; } else { Im = 0; }
+
             String error_nuevo = ""; obtenerIP();
-            String app = "4";
-            try
-            {
+            
+            
                 cn.Open();
-                MySqlCommand cmd = new MySqlCommand("insert into Detalle_aplicacion_derecho(id_usuario,id_aplicacion,ingresar, modificar,eliminar, imprimir,consultar) values(" + uid + ", " + aid + " , " + I + ", " + M + ", " + E + ", " + Im + ", " + C + ")", cn);
+                MySqlCommand cmd = new MySqlCommand("insert into Detalle_aplicacion_derecho(id_usuario,id_aplicacion,ingresar, modificar,eliminar, imprimir,consultar) values(" + Valor1 + ", " + Valor2 + " , " + I + ", " + M + ", " + E + ", " + Im + ", " + C + ")", cn);
                 int g;
                 g = cmd.ExecuteNonQuery();
-                MessageBox.Show("Se han Agregados los privilegios a " + Txt_user.Text);
+                MessageBox.Show("Se han Agregados los privilegios a " + Cmb_user.Text);
                 bloqueados();
                 connection.OpenConnection();
                 connection.InsertarRegistro("insert into bitacora(id_usuario,fecha_bitacora,hora_bitacora,accion_usuario,id_aplicacion,resultado_bitacora,error_bitacora,ip_pc) values((select U.id_usuario from usuario U where U.usuario ='" + Globales.nom_usuario + "'), sysdate(), now(), '" + Globales.sAccionG + "', '" + app + "','" + Globales.sExitoso + "', '" + Globales.sError + "','" + localIP + "')");
@@ -225,6 +275,9 @@ namespace PrototipoSeguridad
         //Guarda los cambios que se han hecho en los derechos de un usuario
         private void Btn_Guardar_Click(object sender, EventArgs e)
         {
+            try
+            {
+
             if (Chb_editar.Checked == true) { M = 1; } else { M = 0; }
             if (Chb_insertar.Checked == true) { I = 1; } else { I = 0; }
             if (Chb_eliminar.Checked == true) { E = 1; } else { E = 0; }
@@ -235,20 +288,23 @@ namespace PrototipoSeguridad
             int o, p, q, r, s, t;
             String error_nuevo = ""; obtenerIP();
             String app = "4";
-            try
-            {
+            
                 cn.Open();
-                MySqlCommand cmd1 = new MySqlCommand("update Detalle_aplicacion_derecho set ingresar = " + I + " where id_usuario = " + uid + " and id_aplicacion = " + aid + ";", cn);
-                MySqlCommand cmd2 = new MySqlCommand("update Detalle_aplicacion_derecho set modificar = " + M + " where id_usuario = " + uid + " and id_aplicacion = " + aid + ";", cn);
-                MySqlCommand cmd3 = new MySqlCommand("update Detalle_aplicacion_derecho set eliminar = " + E + " where id_usuario = " + uid + " and id_aplicacion = " + aid + ";", cn);
-                MySqlCommand cmd4 = new MySqlCommand("update Detalle_aplicacion_derecho set imprimir = " + Im + " where id_usuario = " + uid + " and id_aplicacion = " + aid + ";", cn);
-                MySqlCommand cmd5 = new MySqlCommand("update Detalle_aplicacion_derecho set consultar = " + C + " where id_usuario = " + uid + " and id_aplicacion = " + aid + ";", cn);
+                MySqlCommand cmd1 = new MySqlCommand("update Detalle_aplicacion_derecho set ingresar = " + I + " where id_usuario = " + Valor1 + " and id_aplicacion = " + Valor2 + ";", cn);
+                MySqlCommand cmd2 = new MySqlCommand("update Detalle_aplicacion_derecho set modificar = " + M + " where id_usuario = " + Valor1 + " and id_aplicacion = " + Valor2 + ";", cn);
+                MySqlCommand cmd3 = new MySqlCommand("update Detalle_aplicacion_derecho set eliminar = " + E + " where id_usuario = " + Valor1 + " and id_aplicacion = " + Valor2 + ";", cn);
+                MySqlCommand cmd4 = new MySqlCommand("update Detalle_aplicacion_derecho set imprimir = " + Im + " where id_usuario = " + Valor1 + " and id_aplicacion = " + Valor2 + ";", cn);
+                MySqlCommand cmd5 = new MySqlCommand("update Detalle_aplicacion_derecho set consultar = " + C + " where id_usuario = " + Valor1 + " and id_aplicacion = " + Valor2 + ";", cn);
 
                 o = cmd1.ExecuteNonQuery();
                 p = cmd2.ExecuteNonQuery();
                 q = cmd3.ExecuteNonQuery();
                 r = cmd4.ExecuteNonQuery();
                 s = cmd5.ExecuteNonQuery();
+
+                MessageBox.Show("Se han Agregados los privilegios ");
+
+
                 connection.OpenConnection();
                 connection.InsertarRegistro("insert into bitacora(id_usuario,fecha_bitacora,hora_bitacora,accion_usuario,id_aplicacion,resultado_bitacora,error_bitacora,ip_pc) values((select U.id_usuario from usuario U where U.usuario ='" + Globales.nom_usuario + "'), sysdate(), now(), '" + Globales.sAccionG + "', '" + app + "','" + Globales.sExitoso + "', '" + Globales.sError + "','" + localIP + "')");
                 connection.CloseConnection();
@@ -303,7 +359,7 @@ namespace PrototipoSeguridad
                     Btn_ingresar.Enabled = false;
                     MySqlCommand sentencia = new MySqlCommand();
                     sentencia.Connection = cn;
-                    sentencia.CommandText = "select A.nombre_aplicacion from Detalle_aplicacion_derecho D, Aplicacion A where D.id_usuario = " + uid + " and A.id_aplicacion = D.id_aplicacion;";
+                    sentencia.CommandText = "select A.nombre_aplicacion from Detalle_aplicacion_derecho D, Aplicacion A where D.id_usuario = " + Valor1 + " and A.id_aplicacion = D.id_aplicacion;";
 
                     MySqlDataAdapter da1 = new MySqlDataAdapter(sentencia);
                     DataTable dt = new DataTable();
@@ -333,7 +389,7 @@ namespace PrototipoSeguridad
         //Cuanta cuantas aplicaciones tiene un usuario
         public void countApp() {
 
-           string sql = "select count(A.nombre_aplicacion) as totala from Detalle_aplicacion_derecho D, Aplicacion A where D.id_usuario = "+ uid+ " and A.id_aplicacion = D.id_aplicacion;";
+           string sql = "select count(A.nombre_aplicacion) as totala from Detalle_aplicacion_derecho D, Aplicacion A where D.id_usuario = "+ Valor1+ " and A.id_aplicacion = D.id_aplicacion;";
             MySqlCommand cmd = new MySqlCommand(sql, cn);
 
             //cn.Open(); 
@@ -453,7 +509,7 @@ namespace PrototipoSeguridad
         {
 
             getApp();
-            string sql = "select D.ingresar, D.modificar, D.eliminar, D.imprimir, D.consultar from Detalle_aplicacion_derecho D where id_usuario = "+ uid +" and id_aplicacion = " + aid + "; ";
+            string sql = "select D.ingresar, D.modificar, D.eliminar, D.imprimir, D.consultar from Detalle_aplicacion_derecho D where id_usuario = "+ Valor1 + " and id_aplicacion = " + Valor2 + "; ";
             MySqlCommand com = new MySqlCommand(sql, cn);
 
 
@@ -490,7 +546,7 @@ namespace PrototipoSeguridad
 
         public void eventApp() {
             getApp();
-            string sql = "select D.ingresar, D.modificar, D.eliminar, D.imprimir, D.consultar from Detalle_aplicacion_derecho D where id_usuario = " + uid + " and id_aplicacion = " + aid + "; ";
+            string sql = "select D.ingresar, D.modificar, D.eliminar, D.imprimir, D.consultar from Detalle_aplicacion_derecho D where id_usuario = " + Valor1 + " and id_aplicacion = " + Valor2 + "; ";
             MySqlCommand com = new MySqlCommand(sql, cn);
 
 
@@ -524,7 +580,7 @@ namespace PrototipoSeguridad
 
             try
             {
-                MySqlCommand cmd = new MySqlCommand("delete from Detalle_aplicacion_derecho where id_usuario = " + uid + " and id_aplicacion = " + aid + ";", cn);
+                MySqlCommand cmd = new MySqlCommand("delete from Detalle_aplicacion_derecho where id_usuario = " + Valor1 + " and id_aplicacion = " + Valor2 + ";", cn);
 
                 int r;
 

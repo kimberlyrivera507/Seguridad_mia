@@ -492,6 +492,12 @@
       <DependentUpon>rptusuario_tel.rpt</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Servicios_Medicos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Servicios_Medicos.Designer.cs">
+      <DependentUpon>Servicios_Medicos.cs</DependentUpon>
+    </Compile>
     <Compile Include="Usuarios.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -762,6 +768,9 @@
     <EmbeddedResource Include="rptusuario_tel.rpt">
       <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
       <LastGenOutput>rptusuario_tel.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Servicios_Medicos.resx">
+      <DependentUpon>Servicios_Medicos.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Usuarios.resx">
       <DependentUpon>Usuarios.cs</DependentUpon>

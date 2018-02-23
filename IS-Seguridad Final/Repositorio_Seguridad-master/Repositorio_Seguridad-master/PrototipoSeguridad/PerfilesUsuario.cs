@@ -334,6 +334,8 @@ namespace Perfiles_usuario
         {
             String error_nuevo = ""; obtenerIP();
             String app = "4";
+            
+
             for (int counter = 0; counter < (Dgv_asignacion.Rows.Count) - 1;
          counter++)
             {
@@ -350,7 +352,7 @@ namespace Perfiles_usuario
                     OdbcDataReader MyReader2;
                     MyConn2.Open();
                     MyReader2 = MyCommand2.ExecuteReader();     // Here our query will be executed and data saved into the database.  
-                   // MessageBox.Show("Save Data");
+                    MessageBox.Show("Save Data");
                     while (MyReader2.Read())
                     {
                     }
@@ -363,7 +365,7 @@ namespace Perfiles_usuario
                 catch (Exception ex)
                 {
                     // MessageBox.Show(ex.Message);
-                    // MessageBox.Show(ex.Message);
+                     MessageBox.Show(ex.Message);
                     MessageBox.Show("Datos NO ingresados, verifique la información. " + ex.ToString());
                     s_error = "." + ex.Message + ".";
                     String[] A = s_error.Split(new char[] { '\'' }, StringSplitOptions.RemoveEmptyEntries);

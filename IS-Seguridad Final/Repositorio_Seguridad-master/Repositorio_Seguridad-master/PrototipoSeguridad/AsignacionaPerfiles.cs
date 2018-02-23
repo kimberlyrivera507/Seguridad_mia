@@ -233,54 +233,56 @@ namespace PrototipoSeguridad
 
         }
 
+        String DatoSeleccionado;
+
         private void Btn_Guardar_Click(object sender, EventArgs e)
         {
+            
             String error_nuevo = ""; obtenerIP();
             String app = "3";
-            int selectedIndex = comboBox1.SelectedIndex ;
-
-            for (int counter = 0; counter < (dataGridView2.Rows.Count) - 1;
-         counter++)
+            DatoSeleccionado = comboBox1.Text;
+         //   MessageBox.Show("Es el perfil "+DatoSeleccionado);
+            
+            for (int fila = 0; fila < dataGridView2.Rows.Count - 1; fila++)
             {
-                try
-                {
-                    //This is my connection string i have assigned the database file address path  
+                    string valor = dataGridView2.Rows[fila].Cells[0].Value.ToString();
+                  //  MessageBox.Show("ID de la tabla "+valor);
 
-                    //This is my insert query in which i am taking input from the user through windows forms  
-                    string Query = "insert into bd_seguridad.detalle_perfil_aplicacion(id_perfil,id_aplicacion) values('" + selectedIndex.ToString() + "','" + Convert.ToString(dataGridView2[0, counter].Value) + "');";
-                    //This is  MySqlConnection here i have created the object and pass my connection string.  
-                    OdbcConnection MyConn2 = new OdbcConnection(MyConnection2);
-                    //This is command class which will handle the query and connection object.  
-                    OdbcCommand MyCommand2 = new OdbcCommand(Query, MyConn2);
-                    OdbcDataReader MyReader2;
-                    MyConn2.Open();
-                    MyReader2 = MyCommand2.ExecuteReader();     // Here our query will be executed and data saved into the database.  
-                  //  MessageBox.Show("Save Data");
-                    while (MyReader2.Read())
+
+                    try
                     {
+                        string Query = "insert into bd_seguridad.detalle_perfil_aplicacion(id_perfil,id_aplicacion) values((select id_perfil from perfil where nombre_perfil ='" + DatoSeleccionado + "'),'" + Convert.ToString(dataGridView2[0, fila].Value) + "');";
+                        OdbcConnection MyConn2 = new OdbcConnection(MyConnection2);
+                        OdbcCommand MyCommand2 = new OdbcCommand(Query, MyConn2);
+                        OdbcDataReader MyReader2;
+                        MyConn2.Open();
+                        MyReader2 = MyCommand2.ExecuteReader();
+                       // MessageBox.Show("Save Data");
+                        while (MyReader2.Read())
+                        {
+                        }
+                        MyConn2.Close();
+                        MessageBox.Show("Datos Ingresados");
+                        connection.OpenConnection();
+                        connection.InsertarRegistro("insert into bitacora(id_usuario,fecha_bitacora,hora_bitacora,accion_usuario,id_aplicacion,resultado_bitacora,error_bitacora,ip_pc) values((select U.id_usuario from usuario U where U.usuario ='" + Globales.nom_usuario + "'), sysdate(), now(), '" + Globales.sAccionG + "', '" + app + "','" + Globales.sExitoso + "', '" + Globales.sError + "','" + localIP + "')");
+                        connection.CloseConnection();
                     }
-                    MyConn2.Close();
-                    MessageBox.Show("Datos Ingresados");
-                    connection.OpenConnection();
-                    connection.InsertarRegistro("insert into bitacora(id_usuario,fecha_bitacora,hora_bitacora,accion_usuario,id_aplicacion,resultado_bitacora,error_bitacora,ip_pc) values((select U.id_usuario from usuario U where U.usuario ='" + Globales.nom_usuario + "'), sysdate(), now(), '" + Globales.sAccionG + "', '" + app + "','" + Globales.sExitoso + "', '" + Globales.sError + "','" + localIP + "')");
-                    connection.CloseConnection();
-                }
-                catch (Exception ex)
-                {
-                    // MessageBox.Show(ex.Message);
-                    MessageBox.Show("Datos NO ingresados, verifique la información. " + ex.ToString());
-                    s_error = "." + ex.Message + ".";
-                    String[] A = s_error.Split(new char[] { '\'' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (string i in A)
+                    catch (Exception ex)
                     {
-                        error_nuevo += i;
+                        // MessageBox.Show(ex.Message);
+                        MessageBox.Show("Datos NO ingresados, verifique la información. " + ex.ToString());
+                        s_error = "." + ex.Message + ".";
+                        String[] A = s_error.Split(new char[] { '\'' }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (string i in A)
+                        {
+                            error_nuevo += i;
+                        }
+                        connection.OpenConnection();
+                        connection.InsertarRegistro("insert into bitacora(id_usuario,fecha_bitacora,hora_bitacora,accion_usuario,id_aplicacion,resultado_bitacora,error_bitacora,ip_pc) values((select U.id_usuario from usuario U where U.usuario ='" + Globales.nom_usuario + "'), sysdate(), now(), '" + Globales.sAccionG + "', '" + app + "','" + Globales.sExitoso_n + "', '" + error_nuevo + "','" + localIP + "')");
+                        connection.CloseConnection();
                     }
-                    connection.OpenConnection();
-                    connection.InsertarRegistro("insert into bitacora(id_usuario,fecha_bitacora,hora_bitacora,accion_usuario,id_aplicacion,resultado_bitacora,error_bitacora,ip_pc) values((select U.id_usuario from usuario U where U.usuario ='" + Globales.nom_usuario + "'), sysdate(), now(), '" + Globales.sAccionG + "', '" + app + "','" + Globales.sExitoso_n + "', '" + error_nuevo + "','" + localIP + "')");
-                    connection.CloseConnection();
-                }
+          
             }
-
         }
 
         private void Lbl_editar_Click(object sender, EventArgs e)
